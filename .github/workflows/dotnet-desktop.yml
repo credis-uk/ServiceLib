@@ -43,5 +43,5 @@ jobs:
         & "$msbuildPath" /t:restore
         & "$msbuildPath" /t:build /p:Configuration=${{ matrix.configuration }}
         mkdir ServiceArtifact
-        cp -r Service/bin/${{ matrix.configuration }}/* ServiceArtifact/
+        cp -r bin/${{ matrix.configuration }}/* ServiceArtifact/
       working-directory: ${{ github.workspace }}
