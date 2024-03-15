@@ -1,0 +1,47 @@
+name: .NET Core Desktop
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: Service.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: 'recursive'
+        
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Add MSBuild to the PATH
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+
+    # Build Service Library and publish it as an artifact
+    - name: Build and publish the Service Library
+      run: |
+        $msbuildPath = Get-Command MSBuild.exe | Select-Object -ExpandProperty Source
+        & "$msbuildPath" /t:restore
+        & "$msbuildPath" /t:build /p:Configuration=${{ matrix.configuration }}
+        mkdir ServiceArtifact
+        cp -r Service/bin/${{ matrix.configuration }}/* ServiceArtifact/
+      working-directory: ${{ github.workspace }}
